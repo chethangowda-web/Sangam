@@ -18,8 +18,14 @@
 services:
 
   # ── PostgreSQL with PostGIS + pgvector ──────────────────────────────────
+  # Built from db/Dockerfile (pgvector/pgvector base + apt-installed
+  # postgresql-postgis) rather than a prebuilt "batteries-included" image --
+  # simpler, and CREATE EXTENSION works immediately with no bootstrap role
+  # to create by hand first.
   db:
-    image: supabase/postgres:15.6.0
+    build:
+      context: ./db
+      dockerfile: Dockerfile
     container_name: sangam-db
     ports:
       - "5432:5432"
@@ -27,7 +33,6 @@ services:
       POSTGRES_DB: sangam
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      JWT_SECRET: super-secret-jwt-token-for-local-dev
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -56,6 +61,7 @@ services:
       - ACTIVE_COUNTRY_PACK=india_karnataka
       - PACKS_DIR=/workspace/packs
       - SEED_DB=${SEED_DB:-false}
+      - LOAD_REAL_DATA=${LOAD_REAL_DATA:-false}
     volumes:
       # Mount packs (now inside backend/) so local edits don't need a rebuild
       - ./backend/packs:/workspace/packs:ro

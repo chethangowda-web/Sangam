@@ -49,8 +49,8 @@ def seed_data():
         # boot" from "the fifth redeploy" -- without this, every redeploy
         # silently wipes the demo dataset and, with it, any /reprocess-
         # derived clusters/priorities, back to an empty dashboard (this
-        # happened live: adding an unrelated env var on Render triggered a
-        # redeploy that reset everything). Once data exists, re-seeding is
+        # happened live: adding an unrelated env var triggered a redeploy
+        # that reset everything). Once data exists, re-seeding is
         # a deliberate action (FORCE_RESEED=true), not an automatic one.
         total_report_count = db.query(CitizenReport).count()
         if total_report_count > 0 and not force_reseed:

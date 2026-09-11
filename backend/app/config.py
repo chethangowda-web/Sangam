@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Sangam"
     ENV: str = "development"
     
-    # Supabase / PostgreSQL database URLs
+    # PostgreSQL database URLs
     # SQLAlchemy requires sync driver (psycopg2) for migrations, and async driver (asyncpg) for async fastapi queries
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/sangam"
     ASYNC_DATABASE_URL: Optional[str] = None
@@ -47,7 +47,7 @@ class Settings(BaseSettings):
 
     def __init__(self, **values):
         super().__init__(**values)
-        # Some PaaS env-var UIs (confirmed on Render) save a trailing
+        # Some PaaS env-var UIs save a trailing
         # newline/whitespace when a value is pasted into a multi-line
         # textarea instead of trimming it. libpq then treats it as part of
         # the dbname itself -- e.g. "postgres\n" -- and fails with a

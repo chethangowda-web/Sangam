@@ -89,8 +89,11 @@ class ClusteringEngine:
             # Sourced from the database's own clock, once per run -- see
             # _is_emerging_hotspot's docstring for why this can't be
             # datetime.utcnow(). One query regardless of cluster count.
+            # now()::timestamp strips the timezone-aware offset that raw
+            # now() returns -- reported_at is a naive `DateTime` column, and
+            # comparing a naive and an aware datetime raises TypeError.
             hotspot_now, oldest_report_at = db.execute(
-                text("SELECT now(), MIN(reported_at) FROM citizen_reports")
+                text("SELECT now()::timestamp, MIN(reported_at) FROM citizen_reports")
             ).first()
 
             # Phase 18: Re-attempt Gemini for pending_analysis reports

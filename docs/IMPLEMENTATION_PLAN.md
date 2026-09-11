@@ -207,7 +207,7 @@ graph TD
 ### Phase 8: Testing, Hardening & Demonstration Packaging
 - Automated unit and integration tests (scoring algorithm correctness, verifier unit tests, API tests).
 - Demo seed datasets with realistic scenarios (e.g. Karnataka water supply unserved gap, stalled road asphalt tenders, rural health clinic).
-- Dockerfile, docker-compose, and deployment guides for Render/Vercel/Supabase.
+- Dockerfile, docker-compose, and deployment guides for Railway/Vercel.
 
 ### Phase 9: Citizen Intake Completion, Run Reliability & Location Resolution
 
@@ -876,9 +876,9 @@ found **not** to be gaps, recorded so they aren't re-litigated:
 
 - **Deployment (Section 12)**: not live anywhere yet, but this is an
   operational action, not a missing plan — `DEPLOY.md` already documents
-  the exact Render + Supabase + Vercel topology the design doc specifies,
-  step by step. Nothing to design; it needs doing, by you, when you're
-  ready to deploy.
+  the exact Railway + Vercel topology the design doc specifies, step by
+  step. Nothing to design; it needs doing, by you, when you're ready to
+  deploy.
 - **Repo tree (Section 14)**: the running repo (`backend/`/`frontend/`)
   intentionally diverged from the original `engine/`/`web/` tree — already
   recorded and reasoned about in this doc's opening Status Note. Not a new

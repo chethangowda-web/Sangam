@@ -2,11 +2,12 @@
 
 Kept current as we go. Each item says what's blocked and what unblocks it.
 
-## 1. Set `ADMIN_TOKEN` on Render
+## 1. Set `ADMIN_TOKEN` on Railway
 
 New required env var — Phase 17/20's admin routes (`/api/v1/admin/runs`,
 `/api/v1/admin/flagged`) return 401 for everyone until this is set. Pick
-any strong random value and set it in Render's environment settings.
+any strong random value and set it on the backend service's variables in
+the Railway dashboard.
 
 ## 2. Redeploy soon — a critical bug is fixed and waiting
 

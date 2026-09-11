@@ -91,9 +91,9 @@ Full detail in §17 of the design doc.
 
 ## Stack
 
-Python / FastAPI · Supabase (Postgres + pgvector + PostGIS) · Gemini API
+Python / FastAPI · Railway (Postgres + pgvector + PostGIS) · Gemini API
 (free tier through the build; paid tier from the final week — see Phase 2
-above) · React + Leaflet · Render + Vercel · Apache-2.0
+above) · React + Leaflet · Railway + Vercel · Apache-2.0
 
 > Keep this file pointing at the current version of the design. If the
 > architecture changes, update the artifact rather than letting it rot.

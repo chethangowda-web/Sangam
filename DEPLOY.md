@@ -81,46 +81,58 @@ Tests mock the database, so no PostgreSQL is needed.
 
 ## Production Deployment
 
-### Backend → Render.com
+### Backend + Database → Railway
 
-1. Create a **Web Service** on [Render](https://render.com/)
-2. Connect to the GitHub repo
-3. Set:
-   - **Root directory**: `backend`
-   - **Build command**: `pip install -r requirements.txt`
-   - **Start command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. Add environment variables:
+Both the API and its Postgres/PostGIS/pgvector database run on
+[Railway](https://railway.com/), as two services in one project.
+
+**1. Database service** (`db/Dockerfile`):
+1. In the Railway dashboard: **New → Empty Service**, then set its source
+   to this repo with **Root Directory** = `db` (Railway builds
+   `db/Dockerfile` — a `pgvector/pgvector` base with PostGIS added via
+   apt, chosen over the `supabase/postgres` image because it needs no
+   bootstrap-role workaround to run `CREATE EXTENSION` on a fresh volume).
+2. Attach a **Volume** mounted at `/var/lib/postgresql/data` so data
+   survives redeploys.
+3. Set variables: `POSTGRES_DB=sangam`, `POSTGRES_USER=postgres`,
+   `POSTGRES_PASSWORD=<generate a strong value>`.
+4. Note the service's private/internal `DATABASE_URL` — Railway exposes it
+   as a reference variable other services in the same project can consume
+   directly (see below), no copy-pasting a connection string by hand.
+
+**2. Backend service** (`backend/Dockerfile`):
+1. **New → GitHub Repo** (or `railway up` from the `backend/` directory),
+   with **Root Directory** = `backend`.
+2. Railway assigns the container's listen port dynamically via `$PORT`;
+   the Dockerfile's `CMD` already reads it (`--port ${PORT:-8000}`), so no
+   start-command override is needed.
+3. Add environment variables:
    | Variable | Value |
    |----------|-------|
-   | `DATABASE_URL` | Your Supabase connection string |
+   | `DATABASE_URL` | `${{<db-service-name>.DATABASE_URL}}` — a Railway reference variable pointing at the Postgres service above |
    | `GEMINI_API_KEY` | Your Gemini API key |
    | `ACTIVE_COUNTRY_PACK` | `india_karnataka` |
    | `PACKS_DIR` | `packs` |
    | `ENV` | `production` |
-
-### Database → Supabase
-
-1. Create a project on [Supabase](https://supabase.com/)
-2. The image ships with PostGIS and pgvector pre-installed
-3. Copy the **Connection string** (URI format) → set as `DATABASE_URL`
-4. Run `python -m app.utils.db_init` once to create tables
-5. Run `python -m app.utils.db_seed` to load demo data
+   | `ADMIN_TOKEN` | A strong random value (gates `/api/v1/admin/*`) |
+   | `REPORTER_HASH_PEPPER` | `python -c "import secrets; print(secrets.token_hex(32))"` |
+4. Railway builds and deploys on every push to the linked branch. The
+   Dockerfile's `HEALTHCHECK` and the app's own `/health` endpoint back
+   Railway's deploy health checks.
+5. Once live, run the one-time setup commands against the deployed service
+   with `railway run`:
+   ```bash
+   railway run --service backend python -m app.utils.db_init
+   railway run --service backend python -m app.utils.db_seed        # demo data
+   railway run --service backend python -m app.utils.load_real_data # real Karnataka data
+   ```
 
 ### Frontend → Vercel
 
 1. Connect the repo to [Vercel](https://vercel.com/)
 2. Set **Root directory**: `frontend`
-3. Set the backend API URL as an environment variable
-
-### Keepalive
-
-After deploying, set the `SANGAM_API_URL` secret in GitHub Actions:
-- Go to **Settings → Secrets and variables → Actions**
-- Add `SANGAM_API_URL` = `https://your-backend.onrender.com`
-
-The `keepalive.yml` workflow pings the API twice daily to prevent:
-- Supabase free-tier project pause (7 days idle)
-- Render free-tier spindown (15 minutes idle)
+3. Set the backend API URL (the Railway backend service's public domain)
+   as an environment variable
 
 ---
 
@@ -137,6 +149,9 @@ The `keepalive.yml` workflow pings the API twice daily to prevent:
 | `PACKS_DIR` | No | `packs` | Path to pack configs directory |
 | `ENV` | No | `development` | `development` or `production` |
 | `SEED_DB` | No | `false` | Set `true` for Docker auto-seed |
+| `LOAD_REAL_DATA` | No | `false` | Set `true` to import real Karnataka data on start |
+| `ADMIN_TOKEN` | Production only | `None` | Shared-secret header gating `/api/v1/admin/*` |
+| `REPORTER_HASH_PEPPER` | Production only | Fixed dev fallback | HMAC pepper for hashing citizen channel IDs |
 
 \* The app starts without `GEMINI_API_KEY` but AI features return fallback values.
 
@@ -148,7 +163,7 @@ The `keepalive.yml` workflow pings the API twice daily to prevent:
 ┌──────────────┐     ┌──────────────────┐     ┌──────────────────┐
 │   Frontend   │────▶│  Backend (API)   │────▶│   PostgreSQL     │
 │  React/Vite  │     │  FastAPI/Python  │     │  PostGIS+pgvector│
-│   Vercel     │     │    Render        │     │    Supabase      │
+│   Vercel     │     │    Railway       │     │    Railway       │
 └──────────────┘     └───────┬──────────┘     └──────────────────┘
                              │
                      ┌───────▼──────────┐

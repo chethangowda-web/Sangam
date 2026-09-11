@@ -39,7 +39,7 @@ Sangam is a multilingual, evidence-backed infrastructure prioritization platform
    - **Frontend Dashboard**: [http://localhost:5173](http://localhost:5173) (Run `npm run dev` in the `frontend` directory)
    - **Backend API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-For more deployment options (local native, Render, Vercel, Supabase), see our detailed [Deployment Guide](DEPLOY.md).
+For more deployment options (local native, Railway, Vercel), see our detailed [Deployment Guide](DEPLOY.md).
 
 ## Project Structure
 - `backend/`: FastAPI application, core services (clustering, simulation, scoring, verifier), and database models.
